@@ -19,77 +19,94 @@ document.addEventListener('DOMContentLoaded', (event) => {
 });
 
 function getDiff(text1, text2) {
-    const diff = {
-        original: [],
-        modified: []
-    };
+    // 1. Use diffLines to align blocks of text (LCS algorithm).
+    // ignoreWhitespace: true helps align paragraphs even if they have different trailing spaces or line breaks.
+    const diff = Diff.diffLines(text1, text2, { ignoreWhitespace: true });
 
-    const text1Lines = text1.split('\n');
-    const text2Lines = text2.split('\n');
-    const maxLength = Math.max(text1Lines.length, text2Lines.length);
-
+    const originalLines = [];
+    const modifiedLines = [];
     let removedCount = 0;
     let addedCount = 0;
 
-    for (let i = 0; i < maxLength; i++) {
-        const lineNum = i + 1;
-        const line1 = text1Lines[i] || '';
-        const line2 = text2Lines[i] || '';
+    // 2. Process the diff results into aligned rows for the side-by-side view
+    for (let i = 0; i < diff.length; i++) {
+        const part = diff[i];
+        const nextPart = diff[i + 1];
 
-        const lineDiff = diffLines(line1, line2);
-        removedCount += (lineDiff.original.match(/<span class="removed">/g) || []).length;
-        addedCount += (lineDiff.modified.match(/<span class="added">/g) || []).length;
+        // "Change" detection: If a removal is immediately followed by an addition,
+        // we treat it as a modification and perform a word-level diff for inline highlights.
+        if (part.removed && nextPart && nextPart.added) {
+            const wordDiff = Diff.diffWordsWithSpace(part.value, nextPart.value);
+            let oBlock = '', mBlock = '';
 
-        diff.original.push(`<div>${lineNum}: ${lineDiff.original}</div>`);
-        diff.modified.push(`<div>${lineNum}: ${lineDiff.modified}</div>`);
+            wordDiff.forEach(wp => {
+                const val = escapeHtml(wp.value);
+                if (wp.removed) {
+                    oBlock += `<span class="removed">${val}</span>`;
+                    removedCount++;
+                } else if (wp.added) {
+                    mBlock += `<span class="added">${val}</span>`;
+                    addedCount++;
+                } else {
+                    oBlock += val;
+                    mBlock += val;
+                }
+            });
+
+            const oLines = oBlock.split('\n');
+            const mLines = mBlock.split('\n');
+            const max = Math.max(oLines.length, mLines.length);
+
+            for (let j = 0; j < max; j++) {
+                originalLines.push(oLines[j] || '');
+                modifiedLines.push(mLines[j] || '');
+            }
+            i++; // Skip the 'added' part as we just processed it
+        } 
+        else if (part.removed) {
+            const lines = part.value.split('\n');
+            if (lines[lines.length - 1] === '' && part.value.length > 0) lines.pop();
+            lines.forEach(l => {
+                originalLines.push(`<span class="removed">${escapeHtml(l)}</span>`);
+                modifiedLines.push(''); // Alignment placeholder
+                removedCount++;
+            });
+        } 
+        else if (part.added) {
+            const lines = part.value.split('\n');
+            if (lines[lines.length - 1] === '' && part.value.length > 0) lines.pop();
+            lines.forEach(l => {
+                originalLines.push(''); // Alignment placeholder
+                modifiedLines.push(`<span class="added">${escapeHtml(l)}</span>`);
+                addedCount++;
+            });
+        } 
+        else {
+            const lines = part.value.split('\n');
+            if (lines[lines.length - 1] === '' && part.value.length > 0) lines.pop();
+            lines.forEach(l => {
+                const escaped = escapeHtml(l);
+                originalLines.push(escaped);
+                modifiedLines.push(escaped);
+            });
+        }
     }
 
     const originalStats = getTextStats(text1);
     const modifiedStats = getTextStats(text2);
 
-    diff.original.unshift(`
+    const statsHeader = (stats, count, label) => `
         <div class="stats">
-            <span>Words: ${originalStats.wordCount}</span>
-            <span>Characters: ${originalStats.charCount}</span>
-            <span>Removed: ${removedCount}</span>
-        </div>
-    `);
-    diff.modified.unshift(`
-        <div class="stats">
-            <span>Words: ${modifiedStats.wordCount}</span>
-            <span>Characters: ${modifiedStats.charCount}</span>
-            <span>Added: ${addedCount}</span>
-        </div>
-    `);
+            <span>Words: ${stats.wordCount}</span>
+            <span>Characters: ${stats.charCount}</span>
+            <span>${label}: ${count}</span>
+        </div>`;
 
     return {
-        original: diff.original.join('\n'),
-        modified: diff.modified.join('\n')
-    };
-}
-
-function diffLines(line1, line2) {
-    const diff = Diff.diffWordsWithSpace(line1, line2);
-
-    let originalLine = '';
-    let modifiedLine = '';
-
-    diff.forEach(part => {
-        const className = part.added ? 'added' : part.removed ? 'removed' : '';
-
-        if (part.removed) {
-            originalLine += `<span class="${className}">${escapeHtml(part.value)}</span>`;
-        } else if (part.added) {
-            modifiedLine += `<span class="${className}">${escapeHtml(part.value)}</span>`;
-        } else {
-            originalLine += escapeHtml(part.value);
-            modifiedLine += escapeHtml(part.value);
-        }
-    });
-
-    return {
-        original: originalLine,
-        modified: modifiedLine
+        original: statsHeader(originalStats, removedCount, 'Removed') + 
+                 originalLines.map((l, i) => `<div>${i + 1}: ${l}</div>`).join('\n'),
+        modified: statsHeader(modifiedStats, addedCount, 'Added') + 
+                 modifiedLines.map((l, i) => `<div>${i + 1}: ${l}</div>`).join('\n')
     };
 }
 
