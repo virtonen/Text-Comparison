@@ -1,6 +1,6 @@
 # Text Comparison Tool
 
-This Text Comparison Tool is a simple web application that allows users to compare two pieces of text, highlighting the differences between them. It provides a visual representation of added and removed content, along with word and character counts for each text.
+This Text Comparison Tool is a simple web application that allows users to compare two pieces of text, highlighting the differences between them, even if the formatting is slightly off. It provides a visual representation of added and removed content, along with word and character counts for each text. Whenever a newline is encountered—whether it's in unchanged, added, or removed text—the algorithm "flushes" the current row for both columns. This naturally keeps paragraphs aligned even if one side has extra spacing.
 <p align="center">
   <img src="https://raw.githubusercontent.com/virtonen/Text-Comparison/main/assets/preview.png" alt="Text Comparison Tool Preview" width="600"/>
 </p>
