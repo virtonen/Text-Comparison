@@ -1,8 +1,7 @@
 # Text Comparison Tool
 
 This Text Comparison Tool is a simple web application that allows users to compare two pieces of text, highlighting the differences between them. It provides a visual representation of added and removed content, along with word and character counts for each text.
-![image](https://github.com/jmesplana/Text-Comparison-Tool/assets/21258627/f6657415-fbd1-42fe-bb00-94675f3f7bb3)
-![image](https://github.com/jmesplana/Text-Comparison-Tool/assets/21258627/c9fd7107-26e0-4dd6-bd8c-424a4191fe6a)
+![image](/Users/vvirtonen/GitHub/Text-Comparison/assets/preview.png)
 
 ## Features
 
@@ -33,9 +32,11 @@ text-comparison-tool/
 
 ## Setup and Usage
 
+Use https://virtonen.github.io/Text-Comparison/ or:
+
 1. Clone this repository to your local machine:
    ```
-   git clone https://github.com/jmesplana/text-comparison-tool.git
+   git clone https://github.com/virtonen/Text-Comparison
    ```
 
 2. Open the `index.html` file in a web browser.
@@ -62,7 +63,7 @@ You can customize the appearance of the tool by modifying the `styles.css` file.
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please feel free to submit a Pull Request. Thank you to jmesplana for the [initial version](https://github.com/jmesplana/Text-Comparison-Tool).
 
 ## License
 
