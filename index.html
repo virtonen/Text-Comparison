@@ -6,6 +6,7 @@
     <title>Text Comparison Tool</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.1.0/diff.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
     <header>
@@ -21,32 +22,101 @@
     <div class="instructions">
         <h2>Instructions</h2>
         <ol>
-            <li>Paste or type your original text into the left textarea.</li>
-            <li>Paste or type your modified text into the right textarea.</li>
+            <li>Paste or type your original text into the left textarea, or upload a PDF file.</li>
+            <li>Paste or type your modified text into the right textarea, or upload a PDF file.</li>
             <li>Click the "Compare" button to see the differences.</li>
+            <li>For PDFs, differences will be highlighted directly on the rendered documents.</li>
         </ol>
     </div>
 
-    <div class="container">
-        <div class="textarea-container">
-            <textarea id="text1" placeholder="Paste original text here..."></textarea>
+    <!-- Mode Toggle -->
+    <div class="mode-toggle">
+        <button id="textModeBtn" class="mode-btn active">Text Mode</button>
+        <button id="pdfModeBtn" class="mode-btn">PDF Mode</button>
+    </div>
+
+    <!-- Text Comparison Section -->
+    <div id="textSection" class="section-container">
+        <div class="container">
+            <div class="textarea-container">
+                <textarea id="text1" placeholder="Paste original text here..."></textarea>
+            </div>
+            <div class="textarea-container">
+                <textarea id="text2" placeholder="Paste modified text here..."></textarea>
+            </div>
         </div>
-        <div class="textarea-container">
-            <textarea id="text2" placeholder="Paste modified text here..."></textarea>
+        <div class="buttons-container">
+            <button id="compareButton">Compare</button>
+            <button id="resetButton">Clear All</button>
+        </div>
+        <div class="result-container">
+            <div id="outputOriginal" class="output-column">
+                <button class="copyButton" onclick="copyToClipboard('outputOriginalContent')">Copy Original</button>
+                <div class="output-content" id="outputOriginalContent"></div>
+            </div>
+            <div id="outputModified" class="output-column">
+                <button class="copyButton" onclick="copyToClipboard('outputModifiedContent')">Copy Modified</button>
+                <div class="output-content" id="outputModifiedContent"></div>
+            </div>
         </div>
     </div>
-    <div class="buttons-container">
-        <button id="compareButton">Compare</button>
-        <button id="resetButton">Clear All</button>
-    </div>
-    <div class="result-container">
-        <div id="outputOriginal" class="output-column">
-            <button class="copyButton" onclick="copyToClipboard('outputOriginalContent')">Copy Original</button>
-            <div class="output-content" id="outputOriginalContent"></div>
+
+    <!-- PDF Comparison Section -->
+    <div id="pdfSection" class="section-container" style="display: none;">
+        <div class="pdf-upload-container">
+            <div class="pdf-upload-box">
+                <label class="pdf-upload-label">
+                    <input type="file" id="pdfOriginal" accept=".pdf" class="pdf-input">
+                    <span class="pdf-upload-btn">📄 Upload Original PDF</span>
+                </label>
+                <span id="pdfOriginalName" class="pdf-filename"></span>
+            </div>
+            <div class="pdf-upload-box">
+                <label class="pdf-upload-label">
+                    <input type="file" id="pdfModified" accept=".pdf" class="pdf-input">
+                    <span class="pdf-upload-btn">📄 Upload Modified PDF</span>
+                </label>
+                <span id="pdfModifiedName" class="pdf-filename"></span>
+            </div>
         </div>
-        <div id="outputModified" class="output-column">
-            <button class="copyButton" onclick="copyToClipboard('outputModifiedContent')">Copy Modified</button>
-            <div class="output-content" id="outputModifiedContent"></div>
+        
+        <div class="buttons-container">
+            <button id="comparePdfButton">Compare PDFs</button>
+            <button id="resetPdfButton">Clear PDFs</button>
+        </div>
+
+        <div class="pdf-stats-container" id="pdfStatsContainer" style="display: none;">
+            <div class="pdf-stats">
+                <span id="pdfRemovedCount">Removed: 0</span>
+                <span id="pdfAddedCount">Added: 0</span>
+            </div>
+        </div>
+
+        <div class="pdf-navigation" id="pdfNavigation" style="display: none;">
+            <button id="prevPage">◀ Previous</button>
+            <span id="pageInfo">Page 1 of 1</span>
+            <button id="nextPage">Next ▶</button>
+        </div>
+
+        <div class="pdf-viewer-container">
+            <div class="pdf-viewer-box">
+                <h3>Original PDF</h3>
+                <div class="pdf-viewer" id="pdfViewerOriginal">
+                    <div class="pdf-canvas-wrapper" id="wrapperOriginal">
+                        <canvas id="pdfCanvasOriginal"></canvas>
+                        <div class="pdf-annotation-layer" id="annotationOriginal"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="pdf-viewer-box">
+                <h3>Modified PDF</h3>
+                <div class="pdf-viewer" id="pdfViewerModified">
+                    <div class="pdf-canvas-wrapper" id="wrapperModified">
+                        <canvas id="pdfCanvasModified"></canvas>
+                        <div class="pdf-annotation-layer" id="annotationModified"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
