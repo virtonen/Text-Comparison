@@ -63,13 +63,9 @@ You can customize the appearance of the tool by modifying the `styles.css` file.
 - `.stats`: Styles the statistics display at the top of each output column
 - `.added` and `.removed`: Control the highlighting colors for added and removed content
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request. Thank you to jmesplana for the [initial version](https://github.com/jmesplana/Text-Comparison-Tool).
-
 ## License
 
-This project is open source and available under the [MIT License](LICENSE).
+This project is under a [Proprietary License](LICENSE).
 
 ## Contact
 
