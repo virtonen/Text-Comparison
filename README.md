@@ -60,7 +60,8 @@ You can customize the appearance of the tool by modifying the `styles.css` file.
 - `.container`: Controls the layout of the text input areas
 - `.textarea-container`: Styles the containers for the textareas
 - `.result-container`: Styles the output area where the comparison is displayed
-- `.stats`: Styles the statistics display at the top of each output column
+- `.output-header`: Controls the layout of the header area above each comparison column
+- `.header-stats`: Styles the relocated stats display under each header label
 - `.added` and `.removed`: Control the highlighting colors for added and removed content
 
 ## License

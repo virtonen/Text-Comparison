@@ -64,14 +64,28 @@
             <div class="result-container">
                 <div id="outputOriginal" class="output-panel">
                     <div class="output-header">
-                        <span class="output-label">Original</span>
+                        <div class="output-header-info">
+                            <span class="output-label">Original</span>
+                            <div class="header-stats" id="originalStats">
+                                <span id="originalWordCount">Words: 0</span>
+                                <span id="originalCharCount">Characters: 0</span>
+                                <span id="originalDiffCount">Removed: 0</span>
+                            </div>
+                        </div>
                         <button class="btn-copy" onclick="copyToClipboard('outputOriginalContent')">Copy</button>
                     </div>
                     <div class="output-content" id="outputOriginalContent"></div>
                 </div>
                 <div id="outputModified" class="output-panel">
                     <div class="output-header">
-                        <span class="output-label">Modified</span>
+                        <div class="output-header-info">
+                            <span class="output-label">Modified</span>
+                            <div class="header-stats" id="modifiedStats">
+                                <span id="modifiedWordCount">Words: 0</span>
+                                <span id="modifiedCharCount">Characters: 0</span>
+                                <span id="modifiedDiffCount">Added: 0</span>
+                            </div>
+                        </div>
                         <button class="btn-copy" onclick="copyToClipboard('outputModifiedContent')">Copy</button>
                     </div>
                     <div class="output-content" id="outputModifiedContent"></div>

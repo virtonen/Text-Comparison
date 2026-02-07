@@ -10,8 +10,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
         const outputModified = document.getElementById('outputModifiedContent');
 
         const diff = getDiff(text1, text2);
-        outputOriginal.innerHTML = diff.original;
-        outputModified.innerHTML = diff.modified;
+        outputOriginal.innerHTML = diff.originalHtml;
+        outputModified.innerHTML = diff.modifiedHtml;
+        updateHeaderStats(diff.stats);
     });
 
     document.getElementById('resetButton').addEventListener('click', () => {
@@ -19,6 +20,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         document.getElementById('text2').value = '';
         document.getElementById('outputOriginalContent').innerHTML = '';
         document.getElementById('outputModifiedContent').innerHTML = '';
+        resetHeaderStats();
     });
 
     // Mode toggle event listeners
@@ -37,6 +39,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     document.getElementById('resetPdfButton').addEventListener('click', resetPdfs);
     document.getElementById('prevPage').addEventListener('click', () => changePage(-1));
     document.getElementById('nextPage').addEventListener('click', () => changePage(1));
+    resetHeaderStats();
 });
 
 // Mode switching
@@ -507,18 +510,15 @@ function getDiff(text1, text2) {
     const originalStats = getTextStats(text1);
     const modifiedStats = getTextStats(text2);
 
-    const statsHeader = (stats, count, label) => `
-        <div class="stats">
-            <span>Words: ${stats.wordCount}</span>
-            <span>Characters: ${stats.charCount}</span>
-            <span>${label}: ${count}</span>
-        </div>`;
-
     return {
-        original: statsHeader(originalStats, removedCount, 'Removed') + 
-                 originalLines.map((l, i) => `<div>${i + 1}: ${l}</div>`).join('\n'),
-        modified: statsHeader(modifiedStats, addedCount, 'Added') + 
-                 modifiedLines.map((l, i) => `<div>${i + 1}: ${l}</div>`).join('\n')
+        originalHtml: originalLines.map((l, i) => `<div>${i + 1}: ${l}</div>`).join('\n'),
+        modifiedHtml: modifiedLines.map((l, i) => `<div>${i + 1}: ${l}</div>`).join('\n'),
+        stats: {
+            originalStats,
+            modifiedStats,
+            removedCount,
+            addedCount
+        }
     };
 }
 
@@ -552,4 +552,23 @@ function copyToClipboard(elementId) {
     el.select();
     document.execCommand('copy');
     document.body.removeChild(el);
+}
+
+function updateHeaderStats(stats) {
+    const { originalStats, modifiedStats, removedCount = 0, addedCount = 0 } = stats || {};
+    document.getElementById('originalWordCount').textContent = `Words: ${originalStats?.wordCount ?? 0}`;
+    document.getElementById('originalCharCount').textContent = `Characters: ${originalStats?.charCount ?? 0}`;
+    document.getElementById('originalDiffCount').textContent = `Removed: ${removedCount}`;
+    document.getElementById('modifiedWordCount').textContent = `Words: ${modifiedStats?.wordCount ?? 0}`;
+    document.getElementById('modifiedCharCount').textContent = `Characters: ${modifiedStats?.charCount ?? 0}`;
+    document.getElementById('modifiedDiffCount').textContent = `Added: ${addedCount}`;
+}
+
+function resetHeaderStats() {
+    document.getElementById('originalWordCount').textContent = 'Words: 0';
+    document.getElementById('originalCharCount').textContent = 'Characters: 0';
+    document.getElementById('originalDiffCount').textContent = 'Removed: 0';
+    document.getElementById('modifiedWordCount').textContent = 'Words: 0';
+    document.getElementById('modifiedCharCount').textContent = 'Characters: 0';
+    document.getElementById('modifiedDiffCount').textContent = 'Added: 0';
 }
