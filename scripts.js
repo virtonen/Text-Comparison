@@ -1,35 +1,44 @@
 const BACKEND_URL = 'https://backend-compare.onrender.com';
 
 async function apiCall(path, method = 'GET', payload = null) {
+  console.log(`🔄 Calling ${path}`);
   const config = { method, credentials: 'include' };
   if (payload) {
     config.headers = { 'Content-Type': 'application/json' };
     config.body = JSON.stringify(payload);
   }
-  const res = await fetch(BACKEND_URL + path, config);
-  return res.ok ? res.json() : {};
+  try {
+    const res = await fetch(BACKEND_URL + path, config);
+    console.log(`✅ ${path} status: ${res.status}`);
+    return res.ok ? await res.json() : {};
+  } catch (e) {
+    console.error(`❌ ${path} error:`, e);
+    return {};
+  }
 }
 
-// Restore session + saved text on load
 window.addEventListener('load', async () => {
+  console.log('🚀 Text-Comparison loaded - starting cookie setup');
   await apiCall('/set-session', 'POST', { userId: 'user_' + Date.now() });
   const data = await apiCall('/get-session');
   const ta = document.getElementById('text2');
   if (data.user_text && ta) {
     ta.value = data.user_text;
-    console.log('✅ Restored text from cookie (virtonen/Text-Comparison)');
+    console.log('✅ Restored text from cookie!');
+  } else {
+    console.log('ℹ️ No saved text (first visit)');
+  }
+  if (ta) {
+    let timer;
+    ta.addEventListener('input', e => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        apiCall('/save-input', 'POST', { text: e.target.value });
+        console.log('💾 Auto-saved text');
+      }, 800);
+    });
   }
 });
-
-// Auto-save Modified text while typing (debounced)
-const ta = document.getElementById('text2');
-if (ta) {
-  let timer;
-  ta.addEventListener('input', e => {
-    clearTimeout(timer);
-    timer = setTimeout(() => apiCall('/save-input', 'POST', { text: e.target.value }), 800);
-  });
-}
 
 document.addEventListener('DOMContentLoaded', (event) => {
     // Set up PDF.js worker
